@@ -1,7 +1,7 @@
 <Window x:Class="TextToAudiobookCSharp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Text to Audiobook v14 (C#) — Online + Piper + Offline"
+        Title="Text to Audiobook v14.1 (C#) — Online + Piper + Offline"
         Width="740" Height="870" MinWidth="700" MinHeight="780"
         Background="{StaticResource BgDarkBrush}"
         WindowStartupLocation="CenterScreen">
@@ -19,7 +19,7 @@
 
                 <!-- ═══ Заголовок ═══ -->
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <TextBlock Text="Text to Audiobook  v14  (C#)"
+                    <TextBlock Text="Text to Audiobook  v14.1  (C#)"
                                FontSize="26" FontWeight="Bold"
                                Foreground="{StaticResource TextPrimaryBrush}" />
                     <TextBlock Text="Edge TTS + Piper + Windows SAPI"
@@ -29,7 +29,7 @@
 
                 <!-- ═══ Баннер «Продолжить» ═══ -->
                 <Border x:Name="ResumeCard" Visibility="Collapsed"
-                        Background="#1B2838" CornerRadius="14"
+                        Background="#E8F4EC" CornerRadius="14"
                         BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1"
                         Padding="16,12" Margin="0,8,0,3">
                     <Grid>
@@ -73,6 +73,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="TxtInputFile" Grid.Column="0"
                                      Style="{StaticResource DarkTextBox}" Height="38" />
@@ -80,6 +81,11 @@
                                     Background="{StaticResource AccentBrush}"
                                     Style="{StaticResource RoundButton}" Margin="10,0,0,0"
                                     Click="BtnBrowseInput_Click" />
+                            <Button Grid.Column="2" Content="Папка" Width="90" Height="38"
+                                    Background="{StaticResource BgInputBrush}"
+                                    Foreground="{StaticResource TextSecondaryBrush}"
+                                    Style="{StaticResource RoundButton}" Margin="8,0,0,0"
+                                    Click="BtnOpenInputFolder_Click" />
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -235,7 +241,7 @@
 
         <!-- ═══ Разделитель (перетаскиваемый) ═══ -->
         <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch"
-                       Background="#2A2A40" Margin="0,2" />
+                       Background="#E0E0E0" Margin="0,2" />
 
         <!-- ═══ Нижняя панель: Прогресс и лог ═══ -->
         <Border Grid.Row="2" Background="{StaticResource BgCardBrush}" CornerRadius="14"

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -241,6 +242,17 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnOpenInputFolder_Click(object sender, RoutedEventArgs e)
+    {
+        string file = TxtInputFile.Text.Trim();
+        string? dir = File.Exists(file) ? Path.GetDirectoryName(file) : null;
+        if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+            Process.Start("explorer.exe", dir);
+        else
+            MessageBox.Show("Сначала выберите файл книги.", "Внимание",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
+
     private void BtnBrowseOutput_Click(object sender, RoutedEventArgs e)
     {
         var dlg = new OpenFolderDialog { Title = "Выберите папку для сохранения" };
@@ -271,19 +283,49 @@ public partial class MainWindow : Window
         try
         {
             string enc = BookConverter.DetectEncoding(filePath);
-            string sample = File.ReadAllText(filePath, System.Text.Encoding.GetEncoding(enc));
+            Encoding encoding;
+            try { encoding = Encoding.GetEncoding(enc); }
+            catch { encoding = Encoding.UTF8; }
+
+            string sample = File.ReadAllText(filePath, encoding);
             if (sample.Length > 5000) sample = sample[..5000];
             string lang = BookConverter.DetectLanguage(sample);
 
-            if (BookConverter.DefaultVoices.TryGetValue(lang, out string? defaultVoice))
+            if (!BookConverter.DefaultVoices.TryGetValue(lang, out string? defaultVoice))
+                return;
+
+            // 1. Точное совпадение ShortName (Edge TTS)
+            for (int i = 0; i < _allVoices.Count; i++)
             {
-                for (int i = 0; i < _allVoices.Count; i++)
+                if (_allVoices[i].ShortName == defaultVoice)
                 {
-                    if (_allVoices[i].ShortName == defaultVoice)
-                    {
-                        ComboVoice.SelectedIndex = i;
-                        return;
-                    }
+                    ComboVoice.SelectedIndex = i;
+                    return;
+                }
+            }
+
+            // 2. ShortName начинается с языкового кода (ru-... / en-...)
+            string langCode = lang + "-";
+            for (int i = 0; i < _allVoices.Count; i++)
+            {
+                if (_allVoices[i].ShortName.StartsWith(langCode, StringComparison.OrdinalIgnoreCase))
+                {
+                    ComboVoice.SelectedIndex = i;
+                    return;
+                }
+            }
+
+            // 3. Поиск по ключевым словам в DisplayName (offline / piper)
+            string[] markers = lang == "ru"
+                ? ["рус", "russian", "irina", "pavel", "dmitry", "svetlana"]
+                : ["англ", "english", "zira", "david", "guy", "jenny"];
+            for (int i = 0; i < _allVoices.Count; i++)
+            {
+                string dn = _allVoices[i].DisplayName.ToLowerInvariant();
+                if (markers.Any(m => dn.Contains(m)))
+                {
+                    ComboVoice.SelectedIndex = i;
+                    return;
                 }
             }
         }
@@ -539,7 +581,7 @@ public partial class MainWindow : Window
         if (!string.IsNullOrEmpty(result.MergedFile) && File.Exists(result.MergedFile))
         {
             string mergedFile = result.MergedFile;
-            var btnOpen = CreateDialogButton("▶  Открыть аудиофайл", "#6C63FF");
+            var btnOpen = CreateDialogButton("▶  Открыть аудиофайл", "#2C5F2D");
             btnOpen.Click += (_, _) =>
             {
                 Process.Start(new ProcessStartInfo(mergedFile) { UseShellExecute = true });
@@ -551,7 +593,7 @@ public partial class MainWindow : Window
         if (Directory.Exists(result.OutputDir))
         {
             string outDir = result.OutputDir;
-            var btnFolder = CreateDialogButton("📁  Открыть папку", "#E67E22");
+            var btnFolder = CreateDialogButton("📁  Открыть папку", "#3E8E41");
             btnFolder.Margin = new Thickness(8, 0, 0, 0);
             btnFolder.Click += (_, _) =>
             {
@@ -561,8 +603,8 @@ public partial class MainWindow : Window
             btnPanel.Children.Add(btnFolder);
         }
 
-        var btnClose = CreateDialogButton("Закрыть", "#0F3460");
-        btnClose.Foreground = FindResource("TextSecondaryBrush") as Brush;
+        var btnClose = CreateDialogButton("Закрыть", "#F0F0F0");
+        btnClose.Foreground = FindResource("TextPrimaryBrush") as Brush;
         btnClose.FontWeight = FontWeights.Normal;
         btnClose.Margin = new Thickness(8, 0, 0, 0);
         btnClose.Click += (_, _) => dlg.Close();

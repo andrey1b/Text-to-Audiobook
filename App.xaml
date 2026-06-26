@@ -3,19 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <!-- ── Цветовая палитра (тёмная тема) ── -->
-        <SolidColorBrush x:Key="AccentBrush" Color="#6C63FF" />
-        <SolidColorBrush x:Key="AccentHoverBrush" Color="#5A52D5" />
-        <SolidColorBrush x:Key="SuccessBrush" Color="#2ECC71" />
-        <SolidColorBrush x:Key="WarningBrush" Color="#E67E22" />
-        <SolidColorBrush x:Key="DangerBrush" Color="#E74C3C" />
-        <SolidColorBrush x:Key="BgDarkBrush" Color="#1A1A2E" />
-        <SolidColorBrush x:Key="BgCardBrush" Color="#16213E" />
-        <SolidColorBrush x:Key="BgInputBrush" Color="#0F3460" />
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#EAEAEA" />
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A0A0B8" />
-        <SolidColorBrush x:Key="LogBgBrush" Color="#0D1B2A" />
-        <SolidColorBrush x:Key="LogFgBrush" Color="#89CFF0" />
+        <!-- ── Цветовая палитра (как в GardenPlanner — светлая «садовая» тема) ── -->
+        <!-- Глубокий зелёный акцент + почти-белые фоны, мягкие серые рамки.
+             Светлая и дружелюбная, высокий контраст для пожилых -->
+        <SolidColorBrush x:Key="AccentBrush" Color="#2C5F2D" />        <!-- глубокий садовый зелёный -->
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#234C24" />   <!-- темнее при наведении -->
+        <SolidColorBrush x:Key="SuccessBrush" Color="#3E8E41" />       <!-- зелёный «готово» -->
+        <SolidColorBrush x:Key="WarningBrush" Color="#B8860B" />       <!-- тёплый янтарный -->
+        <SolidColorBrush x:Key="DangerBrush" Color="#C0392B" />        <!-- приглушённый кирпичный -->
+        <SolidColorBrush x:Key="BgDarkBrush" Color="#F7F7F4" />        <!-- светлый тёплый фон окна -->
+        <SolidColorBrush x:Key="BgCardBrush" Color="#FFFFFF" />        <!-- белые карточки -->
+        <SolidColorBrush x:Key="BgInputBrush" Color="#FCFCFA" />       <!-- почти белый для полей -->
+        <SolidColorBrush x:Key="BorderLightBrush" Color="#D8D8D2" />   <!-- мягкая серая рамка -->
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#2B2B2B" />   <!-- тёмно-серый текст -->
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#555555" /> <!-- мягкий серый -->
+        <SolidColorBrush x:Key="LogBgBrush" Color="#FCFCFA" />         <!-- почти белый фон лога -->
+        <SolidColorBrush x:Key="LogFgBrush" Color="#2C5F2D" />         <!-- садовый зелёный текст -->
 
         <!-- ── Стиль кнопок с закруглёнными углами ── -->
         <Style x:Key="RoundButton" TargetType="Button">
@@ -48,7 +51,7 @@
         <Style x:Key="DarkTextBox" TargetType="TextBox">
             <Setter Property="Background" Value="{StaticResource BgInputBrush}" />
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderLightBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="10,6" />
             <Setter Property="FontSize" Value="13" />
@@ -68,7 +71,7 @@
                 <Border x:Name="Border" Grid.ColumnSpan="2"
                         CornerRadius="8"
                         Background="{StaticResource BgInputBrush}"
-                        BorderBrush="{StaticResource AccentBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
                         BorderThickness="1" />
                 <Border Grid.Column="0" CornerRadius="8,0,0,8" Margin="1"
                         Background="Transparent" />
@@ -123,7 +126,7 @@
                                       MinWidth="{TemplateBinding ActualWidth}"
                                       MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                     <Border x:Name="DropDownBorder"
-                                            Background="#1E2A45"
+                                            Background="#FFFFFF"
                                             BorderBrush="{StaticResource AccentBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8"
@@ -159,9 +162,11 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentBrush}" />
+                                <Setter Property="Foreground" Value="White" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentHoverBrush}" />
+                                <Setter Property="Foreground" Value="White" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

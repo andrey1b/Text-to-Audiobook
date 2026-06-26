@@ -1,6 +1,8 @@
 bin/
 obj/
 dist/
+dist_v*/
 publish/
+setup_output/
 *.user
 .vs/
