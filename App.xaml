@@ -1,24 +1,26 @@
 <Application x:Class="TextToAudiobookCSharp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
-        <!-- ── Цветовая палитра (как в GardenPlanner — светлая «садовая» тема) ── -->
-        <!-- Глубокий зелёный акцент + почти-белые фоны, мягкие серые рамки.
-             Светлая и дружелюбная, высокий контраст для пожилых -->
-        <SolidColorBrush x:Key="AccentBrush" Color="#2C5F2D" />        <!-- глубокий садовый зелёный -->
-        <SolidColorBrush x:Key="AccentHoverBrush" Color="#234C24" />   <!-- темнее при наведении -->
-        <SolidColorBrush x:Key="SuccessBrush" Color="#3E8E41" />       <!-- зелёный «готово» -->
-        <SolidColorBrush x:Key="WarningBrush" Color="#B8860B" />       <!-- тёплый янтарный -->
-        <SolidColorBrush x:Key="DangerBrush" Color="#C0392B" />        <!-- приглушённый кирпичный -->
-        <SolidColorBrush x:Key="BgDarkBrush" Color="#D4E8B8" />        <!-- салатный фон окна (темнее) -->
-        <SolidColorBrush x:Key="BgCardBrush" Color="#E8F2D6" />        <!-- светло-салатные карточки -->
-        <SolidColorBrush x:Key="BgInputBrush" Color="#FFFFFF" />       <!-- БЕЛЫЙ только для полей -->
-        <SolidColorBrush x:Key="BorderLightBrush" Color="#BCD79B" />   <!-- зеленоватая рамка полей -->
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#2B2B2B" />   <!-- тёмно-серый текст -->
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#4F5A41" /> <!-- тёмный зеленовато-серый -->
-        <SolidColorBrush x:Key="LogBgBrush" Color="#FFFFFF" />         <!-- белый фон лога -->
-        <SolidColorBrush x:Key="LogFgBrush" Color="#2C5F2D" />         <!-- садовый зелёный текст -->
+        <!-- ── Цветовая палитра по умолчанию (светлая тема GardenPlanner) ── -->
+        <!-- ThemeManager переопределяет эти кисти во время выполнения (DynamicResource) -->
+        <SolidColorBrush x:Key="AccentBrush" Color="#2C5F2D" />
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#234C24" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#3E8E41" />
+        <SolidColorBrush x:Key="WarningBrush" Color="#B8860B" />
+        <SolidColorBrush x:Key="DangerBrush" Color="#C0392B" />
+        <SolidColorBrush x:Key="BgDarkBrush" Color="#D4E8B8" />
+        <SolidColorBrush x:Key="BgCardBrush" Color="#E8F2D6" />
+        <SolidColorBrush x:Key="BgInputBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="BorderLightBrush" Color="#BCD79B" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#2B2B2B" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#4F5A41" />
+        <SolidColorBrush x:Key="LogBgBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="LogFgBrush" Color="#2C5F2D" />
+        <SolidColorBrush x:Key="ResumeBgBrush" Color="#E8F4EC" />
+        <SolidColorBrush x:Key="SplitterBrush" Color="#C9D9BC" />
+        <SolidColorBrush x:Key="DropDownBgBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="HeaderTextBrush" Color="#FFFFFF" />
 
         <!-- ── Стиль кнопок с закруглёнными углами ── -->
         <Style x:Key="RoundButton" TargetType="Button">
@@ -49,17 +51,17 @@
 
         <!-- ── Стиль текстовых полей ── -->
         <Style x:Key="DarkTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="{StaticResource BgInputBrush}" />
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderLightBrush}" />
+            <Setter Property="Background" Value="{DynamicResource BgInputBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="10,6" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="CaretBrush" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
 
-        <!-- ══ Тёмный ComboBox — полный шаблон ══ -->
+        <!-- ══ ComboBox — полный шаблон ══ -->
 
         <!-- Кнопка-стрелка ComboBox -->
         <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
@@ -70,14 +72,14 @@
                 </Grid.ColumnDefinitions>
                 <Border x:Name="Border" Grid.ColumnSpan="2"
                         CornerRadius="8"
-                        Background="{StaticResource BgInputBrush}"
-                        BorderBrush="{StaticResource BorderLightBrush}"
+                        Background="{DynamicResource BgInputBrush}"
+                        BorderBrush="{DynamicResource BorderLightBrush}"
                         BorderThickness="1" />
                 <Border Grid.Column="0" CornerRadius="8,0,0,8" Margin="1"
                         Background="Transparent" />
                 <!-- Стрелка -->
                 <Path x:Name="Arrow" Grid.Column="1"
-                      Fill="{StaticResource TextSecondaryBrush}"
+                      Fill="{DynamicResource TextSecondaryBrush}"
                       HorizontalAlignment="Center" VerticalAlignment="Center"
                       Data="M 0 0 L 4 4 L 8 0 Z" />
             </Grid>
@@ -91,7 +93,7 @@
 
         <!-- Основной стиль ComboBox -->
         <Style x:Key="DarkComboBox" TargetType="ComboBox">
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Height" Value="36" />
             <Setter Property="Cursor" Value="Hand" />
@@ -126,8 +128,8 @@
                                       MinWidth="{TemplateBinding ActualWidth}"
                                       MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                     <Border x:Name="DropDownBorder"
-                                            Background="#FFFFFF"
-                                            BorderBrush="{StaticResource AccentBrush}"
+                                            Background="{DynamicResource DropDownBgBrush}"
+                                            BorderBrush="{DynamicResource AccentBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8"
                                             Margin="0,2,0,0" />
@@ -146,7 +148,7 @@
 
         <!-- Стиль элементов выпадающего списка -->
         <Style TargetType="ComboBoxItem">
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Padding" Value="10,6" />
@@ -161,11 +163,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentBrush}" />
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}" />
                                 <Setter Property="Foreground" Value="White" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentHoverBrush}" />
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentHoverBrush}" />
                                 <Setter Property="Foreground" Value="White" />
                             </Trigger>
                         </ControlTemplate.Triggers>

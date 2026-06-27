@@ -29,13 +29,13 @@ public partial class MainWindow : Window
     private List<OfflineVoiceInfo> _offlineVoices = [];
     private List<PiperVoiceInfo> _piperVoices = [];
 
-    // Режимы
-    private static readonly (string Label, TtsMode Mode)[] TtsModes =
+    // Режимы (ключ локализации + режим)
+    private static readonly (string LabelKey, TtsMode Mode)[] TtsModes =
     [
-        ("Авто (онлайн → Piper → SAPI)", TtsMode.Auto),
-        ("Онлайн (Edge TTS)", TtsMode.Online),
-        ("Piper TTS (нейросеть, оффлайн)", TtsMode.Piper),
-        ("Оффлайн (Windows SAPI)", TtsMode.Offline),
+        ("Loc_ModeAuto", TtsMode.Auto),
+        ("Loc_ModeOnline", TtsMode.Online),
+        ("Loc_ModePiper", TtsMode.Piper),
+        ("Loc_ModeOffline", TtsMode.Offline),
     ];
 
     public MainWindow()
@@ -54,7 +54,7 @@ public partial class MainWindow : Window
         _piperVoices = PiperTtsEngine.GetAvailableVoices();
 
         // Режим TTS
-        ComboTtsMode.ItemsSource = TtsModes.Select(m => m.Label).ToList();
+        ComboTtsMode.ItemsSource = TtsModes.Select(m => Localizer.L(m.LabelKey)).ToList();
         ComboTtsMode.SelectedIndex = 0;
 
         // Голоса — онлайн + оффлайн
@@ -108,41 +108,44 @@ public partial class MainWindow : Window
 
         UpdateVoiceList(_selectedTtsMode);
 
-        // Обновляем статус
-        if (LblModeStatus != null)
+        UpdateModeStatus();
+    }
+
+    private void UpdateModeStatus()
+    {
+        if (LblModeStatus == null) return;
+
+        if (_selectedTtsMode == TtsMode.Piper)
         {
-            if (_selectedTtsMode == TtsMode.Piper)
+            if (_piperVoices.Count > 0)
             {
-                if (_piperVoices.Count > 0)
-                {
-                    LblModeStatus.Text = $"Piper моделей: {_piperVoices.Count}. Нейросетевое качество, без интернета.";
-                    LblModeStatus.Foreground = FindResource("SuccessBrush") as Brush;
-                }
-                else
-                {
-                    LblModeStatus.Text = "Piper не найден! Поместите piper.exe и модели (.onnx) в папку 'piper'.";
-                    LblModeStatus.Foreground = FindResource("DangerBrush") as Brush;
-                }
-            }
-            else if (_selectedTtsMode == TtsMode.Offline)
-            {
-                LblModeStatus.Text = _offlineVoices.Count > 0
-                    ? $"Найдено SAPI-голосов: {_offlineVoices.Count}"
-                    : "SAPI-голоса не найдены!";
-                LblModeStatus.Foreground = _offlineVoices.Count > 0
-                    ? FindResource("SuccessBrush") as Brush
-                    : FindResource("DangerBrush") as Brush;
-            }
-            else if (_selectedTtsMode == TtsMode.Online)
-            {
-                LblModeStatus.Text = "Требуется интернет";
-                LblModeStatus.Foreground = FindResource("TextSecondaryBrush") as Brush;
+                LblModeStatus.Text = string.Format(Localizer.L("Loc_StatusPiperFound"), _piperVoices.Count);
+                LblModeStatus.Foreground = FindResource("SuccessBrush") as Brush;
             }
             else
             {
-                LblModeStatus.Text = "Автовыбор при старте";
-                LblModeStatus.Foreground = FindResource("TextSecondaryBrush") as Brush;
+                LblModeStatus.Text = Localizer.L("Loc_StatusPiperNone");
+                LblModeStatus.Foreground = FindResource("DangerBrush") as Brush;
             }
+        }
+        else if (_selectedTtsMode == TtsMode.Offline)
+        {
+            LblModeStatus.Text = _offlineVoices.Count > 0
+                ? string.Format(Localizer.L("Loc_StatusSapiFound"), _offlineVoices.Count)
+                : Localizer.L("Loc_StatusSapiNone");
+            LblModeStatus.Foreground = _offlineVoices.Count > 0
+                ? FindResource("SuccessBrush") as Brush
+                : FindResource("DangerBrush") as Brush;
+        }
+        else if (_selectedTtsMode == TtsMode.Online)
+        {
+            LblModeStatus.Text = Localizer.L("Loc_StatusOnline");
+            LblModeStatus.Foreground = FindResource("TextSecondaryBrush") as Brush;
+        }
+        else
+        {
+            LblModeStatus.Text = Localizer.L("Loc_StatusAuto");
+            LblModeStatus.Foreground = FindResource("TextSecondaryBrush") as Brush;
         }
     }
 
@@ -174,7 +177,7 @@ public partial class MainWindow : Window
             int done = _unfinished.DoneChapters;
             int total = _unfinished.TotalChapters;
             int pct = total > 0 ? done * 100 / total : 0;
-            ResumeLabel.Text = $"Продолжить: {bookName}  ({done}/{total} — {pct}%)";
+            ResumeLabel.Text = string.Format(Localizer.L("Loc_ResumeFmt"), bookName, done, total, pct);
             ResumeCard.Visibility = Visibility.Visible;
         }
 
@@ -189,7 +192,7 @@ public partial class MainWindow : Window
     private static string FormatHistoryEntry(HistoryEntry e)
     {
         string name = e.BookName ?? "?";
-        string status = e.Finished ? "готово" : $"{e.DoneChapters}/{e.TotalChapters}";
+        string status = e.Finished ? Localizer.L("Loc_Ready") : $"{e.DoneChapters}/{e.TotalChapters}";
         return $"{name}  [{status}]  {e.LastUsed}";
     }
 
@@ -229,8 +232,8 @@ public partial class MainWindow : Window
     {
         var dlg = new OpenFileDialog
         {
-            Title = "Выберите текстовый файл",
-            Filter = "Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*"
+            Title = Localizer.L("Loc_ChooseTextFile"),
+            Filter = Localizer.L("Loc_TextFilesFilter")
         };
         if (dlg.ShowDialog() == true)
         {
@@ -253,13 +256,13 @@ public partial class MainWindow : Window
         if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
             Process.Start("explorer.exe", dir);
         else
-            MessageBox.Show("Сначала выберите файл книги.", "Внимание",
+            MessageBox.Show(Localizer.L("Loc_SelectFileFirst"), Localizer.L("Loc_Warning"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     private void BtnBrowseOutput_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new OpenFolderDialog { Title = "Выберите папку для сохранения" };
+        var dlg = new OpenFolderDialog { Title = Localizer.L("Loc_ChooseFolder") };
         if (dlg.ShowDialog() == true)
             TxtOutputDir.Text = dlg.FolderName;
     }
@@ -274,8 +277,8 @@ public partial class MainWindow : Window
     private async void BtnCheckUpdate_Click(object sender, RoutedEventArgs e)
     {
         BtnCheckUpdate.IsEnabled = false;
-        string oldText = BtnCheckUpdate.Content as string ?? "Проверить обновления";
-        BtnCheckUpdate.Content = "Проверяю...";
+        string oldText = BtnCheckUpdate.Content as string ?? Localizer.L("Loc_Update");
+        BtnCheckUpdate.Content = Localizer.L("Loc_Checking");
         try
         {
             using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
@@ -307,10 +310,9 @@ public partial class MainWindow : Window
             if (latest != null && latest > current)
             {
                 var res = MessageBox.Show(
-                    $"Доступна новая версия: {tag}\n" +
-                    $"У вас установлена: {current.Major}.{current.Minor}\n\n" +
-                    "Скачать обновление сейчас?",
-                    "Доступно обновление",
+                    string.Format(Localizer.L("Loc_UpdateAvailMsg"),
+                        tag, $"{current.Major}.{current.Minor}"),
+                    Localizer.L("Loc_UpdateAvailTitle"),
                     MessageBoxButton.YesNo, MessageBoxImage.Information);
                 if (res == MessageBoxResult.Yes)
                     Process.Start(new ProcessStartInfo(downloadUrl ?? pageUrl) { UseShellExecute = true });
@@ -318,15 +320,15 @@ public partial class MainWindow : Window
             else
             {
                 MessageBox.Show(
-                    $"У вас установлена последняя версия ({current.Major}.{current.Minor}).",
-                    "Обновлений нет", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string.Format(Localizer.L("Loc_NoUpdateMsg"), $"{current.Major}.{current.Minor}"),
+                    Localizer.L("Loc_NoUpdateTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         catch (Exception ex)
         {
             MessageBox.Show(
-                $"Не удалось проверить обновления.\nПроверьте подключение к интернету.\n\n{ex.Message}",
-                "Ошибка проверки", MessageBoxButton.OK, MessageBoxImage.Warning);
+                string.Format(Localizer.L("Loc_UpdateErrMsg"), ex.Message),
+                Localizer.L("Loc_UpdateErrTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         finally
         {
@@ -354,7 +356,7 @@ public partial class MainWindow : Window
         if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
             Process.Start("explorer.exe", dir);
         else
-            MessageBox.Show("Папка ещё не выбрана или не создана.", "Внимание",
+            MessageBox.Show(Localizer.L("Loc_FolderNotReady"), Localizer.L("Loc_Warning"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
@@ -364,7 +366,8 @@ public partial class MainWindow : Window
         if (Directory.Exists(dir))
             Process.Start("explorer.exe", dir);
         else
-            MessageBox.Show("Папка не найдена.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(Localizer.L("Loc_FolderNotFound"), Localizer.L("Loc_Warning"),
+                MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     private void SliderSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -448,13 +451,13 @@ public partial class MainWindow : Window
         if (_pauseToken.IsPaused)
         {
             _pauseToken.Resume();
-            BtnPause.Content = "Пауза";
+            BtnPause.Content = Localizer.L("Loc_Pause");
             BtnPause.Background = FindResource("WarningBrush") as Brush;
         }
         else
         {
             _pauseToken.Pause();
-            BtnPause.Content = "Продолжить";
+            BtnPause.Content = Localizer.L("Loc_Continue");
             BtnPause.Background = FindResource("SuccessBrush") as Brush;
         }
     }
@@ -473,7 +476,7 @@ public partial class MainWindow : Window
         BtnPause.IsEnabled = converting;
         if (!converting)
         {
-            BtnPause.Content = "Пауза";
+            BtnPause.Content = Localizer.L("Loc_Pause");
             BtnPause.Background = FindResource("WarningBrush") as Brush;
         }
     }
@@ -485,19 +488,19 @@ public partial class MainWindow : Window
 
         if (string.IsNullOrEmpty(inputFile))
         {
-            MessageBox.Show("Выберите исходный файл.", "Внимание",
+            MessageBox.Show(Localizer.L("Loc_SelectSource"), Localizer.L("Loc_Warning"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         if (!File.Exists(inputFile))
         {
-            MessageBox.Show($"Файл не найден:\n{inputFile}", "Ошибка",
+            MessageBox.Show(string.Format(Localizer.L("Loc_FileNotFound"), inputFile), Localizer.L("Loc_Error"),
                 MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
         if (string.IsNullOrEmpty(outputDir))
         {
-            MessageBox.Show("Укажите папку для сохранения.", "Внимание",
+            MessageBox.Show(Localizer.L("Loc_SpecifyOutput"), Localizer.L("Loc_Warning"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
@@ -549,11 +552,11 @@ public partial class MainWindow : Window
         }
         catch (OperationCanceledException)
         {
-            AppendLog("\nОстановлено пользователем.");
+            AppendLog(Localizer.L("Loc_StoppedByUser"));
         }
         catch (Exception ex)
         {
-            AppendLog($"\nОшибка: {ex.Message}");
+            AppendLog(string.Format(Localizer.L("Loc_ErrorLogFmt"), ex.Message));
         }
         finally
         {
@@ -603,7 +606,7 @@ public partial class MainWindow : Window
     {
         var dlg = new Window
         {
-            Title = "Конвертация завершена",
+            Title = Localizer.L("Loc_CompletedTitle"),
             Width = 470,
             Height = 330,
             ResizeMode = ResizeMode.NoResize,
@@ -617,7 +620,7 @@ public partial class MainWindow : Window
         // Заголовок
         stack.Children.Add(new TextBlock
         {
-            Text = "✔  Конвертация завершена!",
+            Text = Localizer.L("Loc_CompletedHeader"),
             FontSize = 18, FontWeight = FontWeights.Bold,
             Foreground = FindResource("SuccessBrush") as Brush,
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -636,12 +639,12 @@ public partial class MainWindow : Window
         var infoStack = new StackPanel();
         var lines = new List<(string Label, string Value)>
         {
-            ("Книга:", result.BookName),
-            ("Файлов создано:", result.TotalFiles.ToString()),
-            ("Общий размер:", $"{result.TotalSizeMb} МБ"),
+            (Localizer.L("Loc_Book"), result.BookName),
+            (Localizer.L("Loc_FilesCreated"), result.TotalFiles.ToString()),
+            (Localizer.L("Loc_TotalSize"), $"{result.TotalSizeMb} {Localizer.L("Loc_MB")}"),
         };
         if (!string.IsNullOrEmpty(result.MergedFile))
-            lines.Add(("Итоговый файл:", Path.GetFileName(result.MergedFile)));
+            lines.Add((Localizer.L("Loc_FinalFile"), Path.GetFileName(result.MergedFile)));
 
         foreach (var (label, value) in lines)
         {
@@ -676,10 +679,14 @@ public partial class MainWindow : Window
         // Кнопки
         var btnPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
 
+        var accentBrush = FindResource("AccentBrush") as Brush;
+        var successBrush = FindResource("SuccessBrush") as Brush;
+        var inputBrush = FindResource("BgInputBrush") as Brush;
+
         if (!string.IsNullOrEmpty(result.MergedFile) && File.Exists(result.MergedFile))
         {
             string mergedFile = result.MergedFile;
-            var btnOpen = CreateDialogButton("▶  Открыть аудиофайл", "#2C5F2D");
+            var btnOpen = CreateDialogButton(Localizer.L("Loc_OpenAudio"), accentBrush);
             btnOpen.Click += (_, _) =>
             {
                 Process.Start(new ProcessStartInfo(mergedFile) { UseShellExecute = true });
@@ -691,7 +698,7 @@ public partial class MainWindow : Window
         if (Directory.Exists(result.OutputDir))
         {
             string outDir = result.OutputDir;
-            var btnFolder = CreateDialogButton("📁  Открыть папку", "#3E8E41");
+            var btnFolder = CreateDialogButton(Localizer.L("Loc_OpenFolderBtn"), successBrush);
             btnFolder.Margin = new Thickness(8, 0, 0, 0);
             btnFolder.Click += (_, _) =>
             {
@@ -701,7 +708,7 @@ public partial class MainWindow : Window
             btnPanel.Children.Add(btnFolder);
         }
 
-        var btnClose = CreateDialogButton("Закрыть", "#F0F0F0");
+        var btnClose = CreateDialogButton(Localizer.L("Loc_Close"), inputBrush);
         btnClose.Foreground = FindResource("TextPrimaryBrush") as Brush;
         btnClose.FontWeight = FontWeights.Normal;
         btnClose.Margin = new Thickness(8, 0, 0, 0);
@@ -713,7 +720,7 @@ public partial class MainWindow : Window
         dlg.ShowDialog();
     }
 
-    private static Button CreateDialogButton(string text, string bgColor)
+    private static Button CreateDialogButton(string text, Brush? bg)
     {
         var btn = new Button
         {
@@ -727,10 +734,9 @@ public partial class MainWindow : Window
             BorderThickness = new Thickness(0),
         };
 
-        var color = (Color)ColorConverter.ConvertFromString(bgColor);
         var template = new ControlTemplate(typeof(Button));
         var border = new FrameworkElementFactory(typeof(Border));
-        border.SetValue(Border.BackgroundProperty, new SolidColorBrush(color));
+        border.SetValue(Border.BackgroundProperty, bg ?? Brushes.Gray);
         border.SetValue(Border.CornerRadiusProperty, new CornerRadius(10));
         border.SetValue(Border.PaddingProperty, new Thickness(16, 8, 16, 8));
         border.AppendChild(new FrameworkElementFactory(typeof(ContentPresenter)));
@@ -738,5 +744,129 @@ public partial class MainWindow : Window
         btn.Template = template;
 
         return btn;
+    }
+
+    // ── Диалог настроек (язык + тема) ────────────────────────────────
+
+    private void BtnSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Window
+        {
+            Title = Localizer.L("Loc_SettingsTitle"),
+            Width = 420, Height = 330,
+            ResizeMode = ResizeMode.NoResize,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = this,
+            Background = FindResource("BgDarkBrush") as Brush,
+        };
+
+        var root = new StackPanel { Margin = new Thickness(24, 20, 24, 20) };
+
+        root.Children.Add(new TextBlock
+        {
+            Text = Localizer.L("Loc_SettingsTitle"),
+            FontSize = 20, FontWeight = FontWeights.Bold,
+            Foreground = FindResource("AccentBrush") as Brush,
+            Margin = new Thickness(0, 0, 0, 16),
+        });
+
+        // Язык
+        root.Children.Add(SectionLabel(Localizer.L("Loc_Language")));
+        var rbRu = MakeRadio(Localizer.L("Loc_Russian"), "lang", Localizer.Current == AppLang.Ru);
+        var rbEn = MakeRadio(Localizer.L("Loc_English"), "lang", Localizer.Current == AppLang.En);
+        rbRu.Checked += (_, _) => ApplyLanguage(AppLang.Ru);
+        rbEn.Checked += (_, _) => ApplyLanguage(AppLang.En);
+        root.Children.Add(rbRu);
+        root.Children.Add(rbEn);
+
+        // Тема
+        var themeLabel = SectionLabel(Localizer.L("Loc_Theme"));
+        themeLabel.Margin = new Thickness(0, 14, 0, 4);
+        root.Children.Add(themeLabel);
+        var rbLight = MakeRadio(Localizer.L("Loc_ThemeLight"), "theme", ThemeManager.Current == AppTheme.Light);
+        var rbDark = MakeRadio(Localizer.L("Loc_ThemeDark"), "theme", ThemeManager.Current == AppTheme.Dark);
+        rbLight.Checked += (_, _) => ApplyTheme(AppTheme.Light);
+        rbDark.Checked += (_, _) => ApplyTheme(AppTheme.Dark);
+        root.Children.Add(rbLight);
+        root.Children.Add(rbDark);
+
+        var btnClose = CreateDialogButton(Localizer.L("Loc_Close"), FindResource("AccentBrush") as Brush);
+        btnClose.Margin = new Thickness(0, 20, 0, 0);
+        btnClose.HorizontalAlignment = HorizontalAlignment.Right;
+        btnClose.Click += (_, _) => dlg.Close();
+        root.Children.Add(btnClose);
+
+        dlg.Content = root;
+        dlg.ShowDialog();
+    }
+
+    private TextBlock SectionLabel(string text) => new()
+    {
+        Text = text, FontSize = 14, FontWeight = FontWeights.Bold,
+        Foreground = FindResource("TextPrimaryBrush") as Brush,
+        Margin = new Thickness(0, 0, 0, 4),
+    };
+
+    private RadioButton MakeRadio(string text, string group, bool isChecked) => new()
+    {
+        Content = text, GroupName = group, IsChecked = isChecked,
+        FontSize = 14,
+        Foreground = FindResource("TextPrimaryBrush") as Brush,
+        Margin = new Thickness(8, 3, 0, 3),
+        Cursor = System.Windows.Input.Cursors.Hand,
+    };
+
+    // ── Живое применение языка и темы ────────────────────────────────
+
+    private void ApplyLanguage(AppLang lang)
+    {
+        Localizer.Apply(lang);             // строки в XAML (DynamicResource) обновятся сами
+        App.Settings.Language = lang;
+        App.Settings.Save();
+        RefreshLocalizedCode();            // тексты, выставляемые из кода
+    }
+
+    private void ApplyTheme(AppTheme theme)
+    {
+        ThemeManager.Apply(theme);         // кисти (DynamicResource) обновятся сами
+        App.Settings.Theme = theme;
+        App.Settings.Save();
+        // Освежаем цвета, заданные из кода
+        ProgressFill.Background = FindResource("AccentBrush") as Brush;
+        LblPercent.Foreground = FindResource("AccentBrush") as Brush;
+        if (_pauseToken == null || !_pauseToken.IsPaused)
+            BtnPause.Background = FindResource("WarningBrush") as Brush;
+        UpdateModeStatus();                // перекрашиваем статус режима
+    }
+
+    private void RefreshLocalizedCode()
+    {
+        int modeIdx = ComboTtsMode.SelectedIndex;
+        int voiceIdx = ComboVoice.SelectedIndex;
+        ComboTtsMode.ItemsSource = TtsModes.Select(m => Localizer.L(m.LabelKey)).ToList();
+        ComboTtsMode.SelectedIndex = modeIdx >= 0 ? modeIdx : 0;
+        if (voiceIdx >= 0 && voiceIdx < _allVoices.Count)
+            ComboVoice.SelectedIndex = voiceIdx;
+
+        UpdateModeStatus();
+
+        if (_pauseToken == null || !_pauseToken.IsPaused)
+            BtnPause.Content = Localizer.L("Loc_Pause");
+
+        // Баннер «Продолжить»
+        if (_unfinished != null)
+        {
+            string bookName = _unfinished.BookName ?? Path.GetFileNameWithoutExtension(_unfinished.InputFile ?? "");
+            int done = _unfinished.DoneChapters, total = _unfinished.TotalChapters;
+            int pct = total > 0 ? done * 100 / total : 0;
+            ResumeLabel.Text = string.Format(Localizer.L("Loc_ResumeFmt"), bookName, done, total, pct);
+        }
+
+        // Список истории (без авто-перезагрузки проекта)
+        if (_history.Count > 0)
+        {
+            ComboHistory.ItemsSource = _history.Select(FormatHistoryEntry).ToList();
+            ComboHistory.SelectedIndex = -1;
+        }
     }
 }

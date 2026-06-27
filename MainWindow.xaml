@@ -1,9 +1,9 @@
 <Window x:Class="TextToAudiobookCSharp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Text to Audiobook v14.3 — Online + Piper + Offline"
-        Width="740" Height="870" MinWidth="700" MinHeight="780"
-        Background="{StaticResource BgDarkBrush}"
+        Title="Text to Audiobook v14.4 — Online + Piper + Offline"
+        Width="760" Height="870" MinWidth="720" MinHeight="780"
+        Background="{DynamicResource BgDarkBrush}"
         WindowStartupLocation="CenterScreen">
 
     <Grid>
@@ -14,22 +14,31 @@
             <RowDefinition Height="1.2*" MinHeight="150" />
         </Grid.RowDefinitions>
 
-        <!-- ═══ Зелёная шапка (стиль GardenPlanner) ═══ -->
-        <Border Grid.Row="0" Background="{StaticResource AccentBrush}" Padding="24,16">
+        <!-- ═══ Шапка ═══ -->
+        <Border Grid.Row="0" Background="{DynamicResource AccentBrush}" Padding="24,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Text to Audiobook  v14.3"
-                           FontSize="26" FontWeight="Bold" Foreground="White"
+                <TextBlock Grid.Column="0" Text="Text to Audiobook  v14.4"
+                           FontSize="26" FontWeight="Bold"
+                           Foreground="{DynamicResource HeaderTextBrush}"
                            VerticalAlignment="Center" />
                 <Button x:Name="BtnCheckUpdate" Grid.Column="1"
-                        Content="Проверить обновления" Height="40" Padding="16,0"
+                        Content="{DynamicResource Loc_Update}" Height="40" Padding="16,0"
                         VerticalAlignment="Center"
-                        Background="White" Foreground="{StaticResource AccentBrush}"
+                        Background="White" Foreground="{DynamicResource AccentBrush}"
                         Style="{StaticResource RoundButton}"
                         Click="BtnCheckUpdate_Click" />
+                <Button x:Name="BtnSettings" Grid.Column="2"
+                        Content="⚙" FontSize="20" Width="46" Height="40" Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        Background="White" Foreground="{DynamicResource AccentBrush}"
+                        Style="{StaticResource RoundButton}"
+                        ToolTip="{DynamicResource Loc_Settings}"
+                        Click="BtnSettings_Click" />
             </Grid>
         </Border>
 
@@ -39,8 +48,8 @@
 
                 <!-- ═══ Баннер «Продолжить» ═══ -->
                 <Border x:Name="ResumeCard" Visibility="Collapsed"
-                        Background="#E8F4EC" CornerRadius="14"
-                        BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1"
+                        Background="{DynamicResource ResumeBgBrush}" CornerRadius="14"
+                        BorderBrush="{DynamicResource SuccessBrush}" BorderThickness="1"
                         Padding="16,12" Margin="0,8,0,3">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -49,11 +58,11 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="ResumeLabel" Grid.Column="0"
                                    FontSize="14" FontWeight="Bold"
-                                   Foreground="{StaticResource SuccessBrush}"
+                                   Foreground="{DynamicResource SuccessBrush}"
                                    VerticalAlignment="Center" />
                         <Button x:Name="BtnResume" Grid.Column="1"
-                                Content="Продолжить" Width="120" Height="34"
-                                Background="{StaticResource SuccessBrush}"
+                                Content="{DynamicResource Loc_Continue}" Width="120" Height="34"
+                                Background="{DynamicResource SuccessBrush}"
                                 Style="{StaticResource RoundButton}"
                                 Click="BtnResume_Click" />
                     </Grid>
@@ -61,11 +70,11 @@
 
                 <!-- ═══ Недавние книги ═══ -->
                 <Border x:Name="HistoryCard" Visibility="Collapsed"
-                        Background="{StaticResource BgCardBrush}" CornerRadius="14"
+                        Background="{DynamicResource BgCardBrush}" CornerRadius="14"
                         Padding="16,12" Margin="0,3">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Недавние книги" FontSize="15" FontWeight="Bold"
-                                   Foreground="{StaticResource AccentBrush}"
+                        <TextBlock Text="{DynamicResource Loc_RecentBooks}" FontSize="15" FontWeight="Bold"
+                                   Foreground="{DynamicResource AccentBrush}"
                                    VerticalAlignment="Center" Margin="0,0,12,0" />
                         <ComboBox x:Name="ComboHistory" Width="420"
                                   Style="{StaticResource DarkComboBox}"
@@ -74,11 +83,11 @@
                 </Border>
 
                 <!-- ═══ Карточка: Исходный файл ═══ -->
-                <Border Background="{StaticResource BgCardBrush}" CornerRadius="14"
+                <Border Background="{DynamicResource BgCardBrush}" CornerRadius="14"
                         Padding="16,12" Margin="0,3">
                     <StackPanel>
-                        <TextBlock Text="Исходный файл" FontSize="15" FontWeight="Bold"
-                                   Foreground="{StaticResource AccentBrush}" Margin="0,0,0,6" />
+                        <TextBlock Text="{DynamicResource Loc_SourceFile}" FontSize="15" FontWeight="Bold"
+                                   Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -87,13 +96,13 @@
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="TxtInputFile" Grid.Column="0"
                                      Style="{StaticResource DarkTextBox}" Height="38" />
-                            <Button Grid.Column="1" Content="Обзор" Width="90" Height="38"
-                                    Background="{StaticResource AccentBrush}"
+                            <Button Grid.Column="1" Content="{DynamicResource Loc_Browse}" Width="90" Height="38"
+                                    Background="{DynamicResource AccentBrush}"
                                     Style="{StaticResource RoundButton}" Margin="10,0,0,0"
                                     Click="BtnBrowseInput_Click" />
-                            <Button Grid.Column="2" Content="Папка" Width="90" Height="38"
-                                    Background="{StaticResource BgInputBrush}"
-                                    Foreground="{StaticResource TextSecondaryBrush}"
+                            <Button Grid.Column="2" Content="{DynamicResource Loc_Folder}" Width="90" Height="38"
+                                    Background="{DynamicResource BgInputBrush}"
+                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                     Style="{StaticResource RoundButton}" Margin="8,0,0,0"
                                     Click="BtnOpenInputFolder_Click" />
                         </Grid>
@@ -101,11 +110,11 @@
                 </Border>
 
                 <!-- ═══ Карточка: Папка сохранения ═══ -->
-                <Border Background="{StaticResource BgCardBrush}" CornerRadius="14"
+                <Border Background="{DynamicResource BgCardBrush}" CornerRadius="14"
                         Padding="16,12" Margin="0,3">
                     <StackPanel>
-                        <TextBlock Text="Папка для сохранения" FontSize="15" FontWeight="Bold"
-                                   Foreground="{StaticResource AccentBrush}" Margin="0,0,0,6" />
+                        <TextBlock Text="{DynamicResource Loc_OutputFolder}" FontSize="15" FontWeight="Bold"
+                                   Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -114,21 +123,21 @@
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="TxtOutputDir" Grid.Column="0"
                                      Style="{StaticResource DarkTextBox}" Height="38" />
-                            <Button Grid.Column="1" Content="Обзор" Width="90" Height="38"
-                                    Background="{StaticResource AccentBrush}"
+                            <Button Grid.Column="1" Content="{DynamicResource Loc_Browse}" Width="90" Height="38"
+                                    Background="{DynamicResource AccentBrush}"
                                     Style="{StaticResource RoundButton}" Margin="10,0,0,0"
                                     Click="BtnBrowseOutput_Click" />
-                            <Button Grid.Column="2" Content="Папка" Width="90" Height="38"
-                                    Background="{StaticResource BgInputBrush}"
-                                    Foreground="{StaticResource TextSecondaryBrush}"
+                            <Button Grid.Column="2" Content="{DynamicResource Loc_Folder}" Width="90" Height="38"
+                                    Background="{DynamicResource BgInputBrush}"
+                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                     Style="{StaticResource RoundButton}" Margin="8,0,0,0"
                                     Click="BtnOpenOutputFolder_Click" />
                         </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- ═══ Карточка: Настройки ═══ -->
-                <Border Background="{StaticResource BgCardBrush}" CornerRadius="14"
+                <!-- ═══ Карточка: Настройки конвертации ═══ -->
+                <Border Background="{DynamicResource BgCardBrush}" CornerRadius="14"
                         Padding="16,12" Margin="0,3">
                     <StackPanel>
                         <!-- Режим TTS -->
@@ -138,14 +147,14 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Режим" FontSize="14"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                            <TextBlock Grid.Column="0" Text="{DynamicResource Loc_Mode}" FontSize="14"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                        VerticalAlignment="Center" />
                             <ComboBox x:Name="ComboTtsMode" Grid.Column="1" Width="280"
                                       Style="{StaticResource DarkComboBox}"
                                       SelectionChanged="ComboTtsMode_SelectionChanged" />
                             <TextBlock x:Name="LblModeStatus" Grid.Column="2"
-                                       FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                        VerticalAlignment="Center" Margin="12,0,0,0" />
                         </Grid>
 
@@ -155,8 +164,8 @@
                                 <ColumnDefinition Width="100" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Голос" FontSize="14"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                            <TextBlock Grid.Column="0" Text="{DynamicResource Loc_Voice}" FontSize="14"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                        VerticalAlignment="Center" />
                             <ComboBox x:Name="ComboVoice" Grid.Column="1"
                                       Style="{StaticResource DarkComboBox}" />
@@ -169,8 +178,8 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="50" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Скорость" FontSize="14"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                            <TextBlock Grid.Column="0" Text="{DynamicResource Loc_Speed}" FontSize="14"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                        VerticalAlignment="Center" />
                             <Slider x:Name="SliderSpeed" Grid.Column="1"
                                     Minimum="-50" Maximum="50" Value="0"
@@ -179,7 +188,7 @@
                                     ValueChanged="SliderSpeed_ValueChanged" />
                             <TextBlock x:Name="LblSpeed" Grid.Column="2" Text="+0%"
                                        FontSize="13" FontWeight="Bold"
-                                       Foreground="{StaticResource AccentBrush}"
+                                       Foreground="{DynamicResource AccentBrush}"
                                        VerticalAlignment="Center" HorizontalAlignment="Center" />
                         </Grid>
 
@@ -189,8 +198,8 @@
                                 <ColumnDefinition Width="100" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Кодировка" FontSize="14"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                            <TextBlock Grid.Column="0" Text="{DynamicResource Loc_Encoding}" FontSize="14"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                        VerticalAlignment="Center" />
                             <ComboBox x:Name="ComboEncoding" Grid.Column="1"
                                       Style="{StaticResource DarkComboBox}" />
@@ -198,17 +207,17 @@
 
                         <!-- Чекбоксы -->
                         <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                            <CheckBox x:Name="ChkMerge" Content="Объединить в один файл"
+                            <CheckBox x:Name="ChkMerge" Content="{DynamicResource Loc_Merge}"
                                       IsChecked="True"
-                                      Foreground="{StaticResource TextSecondaryBrush}" FontSize="13"
+                                      Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13"
                                       Margin="0,0,24,0" />
-                            <CheckBox x:Name="ChkNoChapters" Content="Не разбивать на главы"
-                                      Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
+                            <CheckBox x:Name="ChkNoChapters" Content="{DynamicResource Loc_NoChapters}"
+                                      Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                            <CheckBox x:Name="ChkDeleteFragments" Content="Удалить фрагменты после объединения"
+                            <CheckBox x:Name="ChkDeleteFragments" Content="{DynamicResource Loc_DeleteFragments}"
                                       IsChecked="False"
-                                      Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
+                                      Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -225,29 +234,29 @@
                     </Grid.ColumnDefinitions>
 
                     <Button x:Name="BtnOpenFolder" Grid.Column="0"
-                            Content="Открыть папку" Height="42" Padding="14,8"
-                            Background="{StaticResource BgInputBrush}"
-                            Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Normal"
+                            Content="{DynamicResource Loc_OpenFolder}" Height="42" Padding="14,8"
+                            Background="{DynamicResource BgInputBrush}"
+                            Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="Normal"
                             Style="{StaticResource RoundButton}"
                             Click="BtnOpenFolder_Click" />
 
                     <Button x:Name="BtnPause" Grid.Column="1"
-                            Content="Пауза" Height="42" Width="110" Margin="10,0,0,0"
-                            Background="{StaticResource WarningBrush}"
+                            Content="{DynamicResource Loc_Pause}" Height="42" Width="110" Margin="10,0,0,0"
+                            Background="{DynamicResource WarningBrush}"
                             Style="{StaticResource RoundButton}"
                             IsEnabled="False"
                             Click="BtnPause_Click" />
 
                     <Button x:Name="BtnStop" Grid.Column="2"
-                            Content="Стоп" Height="42" Width="90" Margin="10,0,0,0"
-                            Background="{StaticResource DangerBrush}"
+                            Content="{DynamicResource Loc_Stop}" Height="42" Width="90" Margin="10,0,0,0"
+                            Background="{DynamicResource DangerBrush}"
                             Style="{StaticResource RoundButton}"
                             IsEnabled="False"
                             Click="BtnStop_Click" />
 
                     <Button x:Name="BtnStart" Grid.Column="5"
-                            Content="Начать конвертацию" Height="42" Padding="20,8"
-                            Background="{StaticResource AccentBrush}"
+                            Content="{DynamicResource Loc_Start}" Height="42" Padding="20,8"
+                            Background="{DynamicResource AccentBrush}"
                             Style="{StaticResource RoundButton}"
                             Click="BtnStart_Click" />
                 </Grid>
@@ -257,10 +266,10 @@
 
         <!-- ═══ Разделитель (перетаскиваемый) ═══ -->
         <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch"
-                       Background="#C9D9BC" Margin="24,2" />
+                       Background="{DynamicResource SplitterBrush}" Margin="24,2" />
 
         <!-- ═══ Нижняя панель: Прогресс и лог ═══ -->
-        <Border Grid.Row="3" Background="{StaticResource BgCardBrush}" CornerRadius="14"
+        <Border Grid.Row="3" Background="{DynamicResource BgCardBrush}" CornerRadius="14"
                 Padding="16,12" Margin="24,3,24,16">
             <DockPanel>
                 <!-- Заголовок прогресса -->
@@ -271,34 +280,34 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Прогресс" FontSize="15" FontWeight="Bold"
-                               Foreground="{StaticResource AccentBrush}" />
+                    <TextBlock Grid.Column="0" Text="{DynamicResource Loc_Progress}" FontSize="15" FontWeight="Bold"
+                               Foreground="{DynamicResource AccentBrush}" />
                     <TextBlock x:Name="LblEta" Grid.Column="2" FontSize="13"
-                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
                                Margin="0,0,16,0" />
                     <TextBlock x:Name="LblPercent" Grid.Column="3" Text="0%"
                                FontSize="13" FontWeight="Bold"
-                               Foreground="{StaticResource AccentBrush}" />
+                               Foreground="{DynamicResource AccentBrush}" />
                 </Grid>
 
                 <!-- Прогресс-бар -->
                 <Border DockPanel.Dock="Top" CornerRadius="5" Height="10"
-                        Background="{StaticResource BgInputBrush}" Margin="0,0,0,8">
+                        Background="{DynamicResource BgInputBrush}" Margin="0,0,0,8">
                     <Border x:Name="ProgressFill" CornerRadius="5" Height="10"
-                            Background="{StaticResource AccentBrush}"
+                            Background="{DynamicResource AccentBrush}"
                             HorizontalAlignment="Left" Width="0" />
                 </Border>
 
                 <!-- Шрифт лога -->
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
-                    <TextBlock Text="Шрифт лога" FontSize="12"
-                               Foreground="{StaticResource TextSecondaryBrush}"
+                    <TextBlock Text="{DynamicResource Loc_LogFont}" FontSize="12"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
                                VerticalAlignment="Center" Margin="0,0,8,0" />
                     <ComboBox x:Name="ComboLogFont" Width="170"
                               Style="{StaticResource DarkComboBox}"
                               SelectionChanged="ComboLogFont_SelectionChanged" />
-                    <TextBlock Text="Размер" FontSize="12"
-                               Foreground="{StaticResource TextSecondaryBrush}"
+                    <TextBlock Text="{DynamicResource Loc_Size}" FontSize="12"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
                                VerticalAlignment="Center" Margin="16,0,8,0" />
                     <ComboBox x:Name="ComboLogFontSize" Width="70"
                               Style="{StaticResource DarkComboBox}"
@@ -309,8 +318,8 @@
                 <TextBox x:Name="TxtLog" IsReadOnly="True"
                          TextWrapping="Wrap" AcceptsReturn="True"
                          VerticalScrollBarVisibility="Auto"
-                         Background="{StaticResource LogBgBrush}"
-                         Foreground="{StaticResource LogFgBrush}"
+                         Background="{DynamicResource LogBgBrush}"
+                         Foreground="{DynamicResource LogFgBrush}"
                          FontFamily="Consolas" FontSize="14"
                          BorderThickness="0" Padding="12,8"
                          VerticalAlignment="Stretch" />
