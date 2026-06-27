@@ -11,13 +11,13 @@
         <SolidColorBrush x:Key="SuccessBrush" Color="#3E8E41" />       <!-- зелёный «готово» -->
         <SolidColorBrush x:Key="WarningBrush" Color="#B8860B" />       <!-- тёплый янтарный -->
         <SolidColorBrush x:Key="DangerBrush" Color="#C0392B" />        <!-- приглушённый кирпичный -->
-        <SolidColorBrush x:Key="BgDarkBrush" Color="#E4EFD6" />        <!-- мягкий салатный фон окна -->
-        <SolidColorBrush x:Key="BgCardBrush" Color="#FFFFFF" />        <!-- белые карточки -->
-        <SolidColorBrush x:Key="BgInputBrush" Color="#FCFCFA" />       <!-- почти белый для полей -->
-        <SolidColorBrush x:Key="BorderLightBrush" Color="#D8D8D2" />   <!-- мягкая серая рамка -->
+        <SolidColorBrush x:Key="BgDarkBrush" Color="#D4E8B8" />        <!-- салатный фон окна (темнее) -->
+        <SolidColorBrush x:Key="BgCardBrush" Color="#E8F2D6" />        <!-- светло-салатные карточки -->
+        <SolidColorBrush x:Key="BgInputBrush" Color="#FFFFFF" />       <!-- БЕЛЫЙ только для полей -->
+        <SolidColorBrush x:Key="BorderLightBrush" Color="#BCD79B" />   <!-- зеленоватая рамка полей -->
         <SolidColorBrush x:Key="TextPrimaryBrush" Color="#2B2B2B" />   <!-- тёмно-серый текст -->
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#555555" /> <!-- мягкий серый -->
-        <SolidColorBrush x:Key="LogBgBrush" Color="#FCFCFA" />         <!-- почти белый фон лога -->
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#4F5A41" /> <!-- тёмный зеленовато-серый -->
+        <SolidColorBrush x:Key="LogBgBrush" Color="#FFFFFF" />         <!-- белый фон лога -->
         <SolidColorBrush x:Key="LogFgBrush" Color="#2C5F2D" />         <!-- садовый зелёный текст -->
 
         <!-- ── Стиль кнопок с закруглёнными углами ── -->

@@ -12,11 +12,33 @@ namespace TextToAudiobookCSharp;
 public class EdgeTtsEngine
 {
     private const string TRUSTED_CLIENT_TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
+    // Версия Chromium должна быть актуальной, иначе сервер отвечает 403
+    private const string CHROMIUM_VERSION = "143.0.3650.75";
+    private const string CHROMIUM_MAJOR = "143";
+    private const string SEC_MS_GEC_VERSION = "1-" + CHROMIUM_VERSION;
     private const string VOICE_LIST_URL =
         $"https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list?trustedclienttoken={TRUSTED_CLIENT_TOKEN}";
 
-    public int MaxRetries { get; set; } = 5;
-    public int[] RetryDelays { get; set; } = [5, 15, 30, 60, 120];
+    public int MaxRetries { get; set; } = 3;
+    public int[] RetryDelays { get; set; } = [2, 4, 8];
+
+    /// <summary>
+    /// Генерирует токен безопасности Sec-MS-GEC, который Microsoft требует
+    /// с конца 2024 года для подключения к Edge TTS (иначе сервер отвечает 403).
+    /// Алгоритм: SHA-256 от (время Windows, округлённое до 5 минут + клиентский токен).
+    /// </summary>
+    private static string GenerateSecMsGecToken()
+    {
+        // .NET-тики — 100-нс интервалы с 0001-01-01; FILETIME — с 1601-01-01
+        long winEpoch = new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
+        long ticks = DateTime.UtcNow.Ticks - winEpoch; // 100-нс тики с 1601
+        // Округляем вниз до ближайших 5 минут (300 сек = 3 000 000 000 тиков по 100 нс)
+        ticks -= ticks % 3_000_000_000L;
+
+        string strToHash = ticks.ToString() + TRUSTED_CLIENT_TOKEN;
+        byte[] hash = System.Security.Cryptography.SHA256.HashData(Encoding.ASCII.GetBytes(strToHash));
+        return Convert.ToHexString(hash); // hex в верхнем регистре
+    }
 
     private static string MakeTimestamp()
     {
@@ -30,8 +52,11 @@ public class EdgeTtsEngine
     private static string MakeWssUrl()
     {
         string connectionId = Guid.NewGuid().ToString("N");
+        string secToken = GenerateSecMsGecToken();
         return $"wss://speech.platform.bing.com/consumer/speech/synthesize/" +
                $"readaloud/edge/v1?TrustedClientToken={TRUSTED_CLIENT_TOKEN}" +
+               $"&Sec-MS-GEC={secToken}" +
+               $"&Sec-MS-GEC-Version={SEC_MS_GEC_VERSION}" +
                $"&ConnectionId={connectionId}";
     }
 
@@ -62,10 +87,12 @@ public class EdgeTtsEngine
         using var ws = new ClientWebSocket();
         ws.Options.SetRequestHeader("User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-            "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0");
+            $"(KHTML, like Gecko) Chrome/{CHROMIUM_MAJOR}.0.0.0 Safari/537.36 Edg/{CHROMIUM_MAJOR}.0.0.0");
         ws.Options.SetRequestHeader("Pragma", "no-cache");
         ws.Options.SetRequestHeader("Cache-Control", "no-cache");
-        ws.Options.SetRequestHeader("Origin", "chrome-extension://jdiccldimpdaibmpdmdber");
+        ws.Options.SetRequestHeader("Origin", "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold");
+        ws.Options.SetRequestHeader("Accept-Encoding", "gzip, deflate, br, zstd");
+        ws.Options.SetRequestHeader("Accept-Language", "en-US,en;q=0.9");
 
         string url = MakeWssUrl();
         await ws.ConnectAsync(new Uri(url), ct);

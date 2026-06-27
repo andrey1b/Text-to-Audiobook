@@ -2,9 +2,9 @@
 from PIL import Image, ImageDraw
 import math, os
 
-ACCENT   = (108,  99, 255)   # #6C63FF
-BG_TOP   = ( 26,  26,  46)   # #1A1A2E
-BG_BOT   = ( 22,  33,  62)   # #16213E
+ACCENT   = (255, 255, 255)   # белые наушники
+BG_TOP   = ( 62, 142,  65)   # #3E8E41 — светлее зелёный
+BG_BOT   = ( 44,  95,  45)   # #2C5F2D — садовый зелёный
 WHITE    = (255, 255, 255)
 
 
