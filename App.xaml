@@ -11,7 +11,7 @@
         <SolidColorBrush x:Key="SuccessBrush" Color="#3E8E41" />       <!-- зелёный «готово» -->
         <SolidColorBrush x:Key="WarningBrush" Color="#B8860B" />       <!-- тёплый янтарный -->
         <SolidColorBrush x:Key="DangerBrush" Color="#C0392B" />        <!-- приглушённый кирпичный -->
-        <SolidColorBrush x:Key="BgDarkBrush" Color="#F7F7F4" />        <!-- светлый тёплый фон окна -->
+        <SolidColorBrush x:Key="BgDarkBrush" Color="#E4EFD6" />        <!-- мягкий салатный фон окна -->
         <SolidColorBrush x:Key="BgCardBrush" Color="#FFFFFF" />        <!-- белые карточки -->
         <SolidColorBrush x:Key="BgInputBrush" Color="#FCFCFA" />       <!-- почти белый для полей -->
         <SolidColorBrush x:Key="BorderLightBrush" Color="#D8D8D2" />   <!-- мягкая серая рамка -->

@@ -8,8 +8,8 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>app_icon.ico</ApplicationIcon>
     <AssemblyTitle>Text to Audiobook</AssemblyTitle>
-    <AssemblyVersion>14.1.0.0</AssemblyVersion>
-    <FileVersion>14.1.0.0</FileVersion>
+    <AssemblyVersion>14.2.0.0</AssemblyVersion>
+    <FileVersion>14.2.0.0</FileVersion>
     <Description>Конвертер текстовых книг в аудиокниги (Edge TTS + Offline SAPI)</Description>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>

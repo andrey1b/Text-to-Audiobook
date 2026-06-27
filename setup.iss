@@ -1,8 +1,8 @@
 #define AppName "Text to Audiobook"
-#define AppVersion "14.1"
+#define AppVersion "14.2"
 #define AppPublisher "Andrey Buchin"
 #define AppExeName "TextToAudiobookCSharp.exe"
-#define SourceDir "dist_v14.1"
+#define SourceDir "dist_v14.2"
 
 [Setup]
 AppId={{A3F2B1C4-7E5D-4A0F-9B2E-1C3D5E7F8A9B}
@@ -14,7 +14,7 @@ DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 AllowNoIcons=yes
 OutputDir=setup_output
-OutputBaseFilename=TextToAudiobook_v14.1_setup
+OutputBaseFilename=TextToAudiobook_v14.2_setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

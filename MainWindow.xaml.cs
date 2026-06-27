@@ -1,10 +1,14 @@
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
+using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
 using System.Linq;
 
 namespace TextToAudiobookCSharp;
@@ -258,6 +262,100 @@ public partial class MainWindow : Window
         var dlg = new OpenFolderDialog { Title = "Выберите папку для сохранения" };
         if (dlg.ShowDialog() == true)
             TxtOutputDir.Text = dlg.FolderName;
+    }
+
+    // ── Проверка обновлений (через GitHub Releases) ──────────────────
+
+    private const string UpdateApiUrl =
+        "https://api.github.com/repos/andrey1b/Text-to-Audiobook/releases/latest";
+    private const string ReleasesPageUrl =
+        "https://github.com/andrey1b/Text-to-Audiobook/releases/latest";
+
+    private async void BtnCheckUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        BtnCheckUpdate.IsEnabled = false;
+        string oldText = BtnCheckUpdate.Content as string ?? "Проверить обновления";
+        BtnCheckUpdate.Content = "Проверяю...";
+        try
+        {
+            using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+            http.DefaultRequestHeaders.Add("User-Agent", "TextToAudiobook-UpdateCheck");
+            string json = await http.GetStringAsync(UpdateApiUrl);
+            var release = JObject.Parse(json);
+
+            string tag = (string?)release["tag_name"] ?? "";
+            string pageUrl = (string?)release["html_url"] ?? ReleasesPageUrl;
+
+            // Ищем .exe-установщик среди файлов релиза
+            string? downloadUrl = null;
+            if (release["assets"] is JArray assets)
+            {
+                foreach (var asset in assets)
+                {
+                    string name = (string?)asset["name"] ?? "";
+                    if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                    {
+                        downloadUrl = (string?)asset["browser_download_url"];
+                        break;
+                    }
+                }
+            }
+
+            Version? latest = ParseVersion(tag);
+            Version current = Assembly.GetExecutingAssembly().GetName().Version ?? new Version(0, 0);
+
+            if (latest != null && latest > current)
+            {
+                var res = MessageBox.Show(
+                    $"Доступна новая версия: {tag}\n" +
+                    $"У вас установлена: {current.Major}.{current.Minor}\n\n" +
+                    "Скачать обновление сейчас?",
+                    "Доступно обновление",
+                    MessageBoxButton.YesNo, MessageBoxImage.Information);
+                if (res == MessageBoxResult.Yes)
+                    Process.Start(new ProcessStartInfo(downloadUrl ?? pageUrl) { UseShellExecute = true });
+            }
+            else
+            {
+                MessageBox.Show(
+                    $"У вас установлена последняя версия ({current.Major}.{current.Minor}).",
+                    "Обновлений нет", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Не удалось проверить обновления.\nПроверьте подключение к интернету.\n\n{ex.Message}",
+                "Ошибка проверки", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        finally
+        {
+            BtnCheckUpdate.Content = oldText;
+            BtnCheckUpdate.IsEnabled = true;
+        }
+    }
+
+    private static Version? ParseVersion(string tag)
+    {
+        var m = Regex.Match(tag, @"(\d+)\.(\d+)(?:\.(\d+))?");
+        if (!m.Success) return null;
+        int major = int.Parse(m.Groups[1].Value);
+        int minor = int.Parse(m.Groups[2].Value);
+        int patch = m.Groups[3].Success ? int.Parse(m.Groups[3].Value) : 0;
+        return new Version(major, minor, patch, 0);
+    }
+
+    private void BtnOpenOutputFolder_Click(object sender, RoutedEventArgs e)
+    {
+        string dir = TxtOutputDir.Text.Trim();
+        // Если папка ещё не создана — открываем родительскую
+        if (!Directory.Exists(dir))
+            dir = Path.GetDirectoryName(dir) ?? "";
+        if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+            Process.Start("explorer.exe", dir);
+        else
+            MessageBox.Show("Папка ещё не выбрана или не создана.", "Внимание",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     private void BtnOpenFolder_Click(object sender, RoutedEventArgs e)
