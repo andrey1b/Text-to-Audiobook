@@ -74,8 +74,8 @@ public class EdgeTtsEngine
             catch (Exception ex) when (attempt < MaxRetries && !ct.IsCancellationRequested)
             {
                 int delay = RetryDelays[Math.Min(attempt, RetryDelays.Length - 1)];
-                log?.Invoke($"  Сервер недоступен: {ex.Message}");
-                log?.Invoke($"  Повторная попытка через {delay} сек ({attempt + 1}/{MaxRetries})...");
+                log?.Invoke(string.Format(Localizer.L("Log_ServerUnavail"), ex.Message));
+                log?.Invoke(string.Format(Localizer.L("Log_RetryIn"), delay, attempt + 1, MaxRetries));
                 await Task.Delay(delay * 1000, ct);
             }
         }

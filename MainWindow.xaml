@@ -1,7 +1,7 @@
 <Window x:Class="TextToAudiobookCSharp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Text to Audiobook v14.4 — Online + Piper + Offline"
+        Title="Text to Audiobook v14.5 — Online + Piper + Offline"
         Width="760" Height="870" MinWidth="720" MinHeight="780"
         Background="{DynamicResource BgDarkBrush}"
         WindowStartupLocation="CenterScreen">
@@ -22,7 +22,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Text to Audiobook  v14.4"
+                <TextBlock Grid.Column="0" Text="Text to Audiobook  v14.5"
                            FontSize="26" FontWeight="Bold"
                            Foreground="{DynamicResource HeaderTextBrush}"
                            VerticalAlignment="Center" />

@@ -97,8 +97,8 @@ public class BookConverter
         }
         catch (Exception ex) when (piperVoices != null && piperVoices.Count > 0)
         {
-            log?.Invoke($"  Онлайн-синтез не удался: {ex.Message}");
-            log?.Invoke("  Переключаюсь на Piper TTS...");
+            log?.Invoke(string.Format(Localizer.L("Log_OnlineFailed"), ex.Message));
+            log?.Invoke(Localizer.L("Log_SwitchPiper"));
             string modelPath = PiperTtsEngine.FindPiperModelFor(voice, piperVoices);
             double lengthScale = 1.0 - (speedPct / 100.0);
             lengthScale = Math.Clamp(lengthScale, 0.3, 2.0);
@@ -106,8 +106,8 @@ public class BookConverter
         }
         catch (Exception ex) when (offlineVoices.Count > 0)
         {
-            log?.Invoke($"  Онлайн-синтез не удался: {ex.Message}");
-            log?.Invoke("  Переключаюсь на оффлайн (SAPI)...");
+            log?.Invoke(string.Format(Localizer.L("Log_OnlineFailed"), ex.Message));
+            log?.Invoke(Localizer.L("Log_SwitchSapi"));
             string offlineVoice = OfflineTtsEngine.FindOfflineVoiceFor(voice, offlineVoices);
             await _offlineTts.SynthesizeAsync(text, offlineVoice, speedPct, outputPath, log, ct);
         }
@@ -122,12 +122,12 @@ public class BookConverter
         // BOM
         if (raw.Length >= 3 && raw[0] == 0xEF && raw[1] == 0xBB && raw[2] == 0xBF)
         {
-            log?.Invoke("Кодировка: UTF-8 (BOM)");
+            log?.Invoke(Localizer.L("Enc_Utf8Bom"));
             return "utf-8";
         }
         if (raw.Length >= 2 && ((raw[0] == 0xFF && raw[1] == 0xFE) || (raw[0] == 0xFE && raw[1] == 0xFF)))
         {
-            log?.Invoke("Кодировка: UTF-16 (BOM)");
+            log?.Invoke(Localizer.L("Enc_Utf16Bom"));
             return "utf-16";
         }
 
@@ -139,7 +139,7 @@ public class BookConverter
             {
                 string enc = result.Detected.EncodingName;
                 double conf = result.Detected.Confidence;
-                log?.Invoke($"Кодировка: {enc} (уверенность: {conf:P0})");
+                log?.Invoke(string.Format(Localizer.L("Enc_Detected"), enc, conf.ToString("P0")));
 
                 // Проверяем что реально работает
                 try
@@ -147,7 +147,7 @@ public class BookConverter
                     Encoding.GetEncoding(enc).GetString(raw);
                     return enc;
                 }
-                catch { log?.Invoke($"  Предположение {enc} не подошло, пробую utf-8..."); }
+                catch { log?.Invoke(string.Format(Localizer.L("Enc_GuessFail"), enc)); }
             }
         }
         catch { }
@@ -159,13 +159,13 @@ public class BookConverter
             try
             {
                 Encoding.GetEncoding(enc).GetString(raw);
-                log?.Invoke($"Кодировка (подбор): {enc}");
+                log?.Invoke(string.Format(Localizer.L("Enc_Picked"), enc));
                 return enc;
             }
             catch { }
         }
 
-        log?.Invoke("Кодировка: не удалось определить, использую utf-8");
+        log?.Invoke(Localizer.L("Enc_Unknown"));
         return "utf-8";
     }
 
@@ -274,7 +274,7 @@ public class BookConverter
     public static async Task MergeFilesAsync(
         List<string> files, string outputPath, Action<string>? log = null)
     {
-        log?.Invoke("Объединение фрагментов в один файл...");
+        log?.Invoke(Localizer.L("Log_Merging"));
 
         // Простое склеивание MP3 байтов (все файлы одного формата от Edge TTS)
         using var outStream = File.Create(outputPath);
@@ -286,7 +286,7 @@ public class BookConverter
                 await outStream.WriteAsync(data);
             }
         }
-        log?.Invoke($"Объединённый файл: {outputPath}");
+        log?.Invoke(string.Format(Localizer.L("Log_MergedFile"), outputPath));
     }
 
     // ── Форматирование времени ───────────────────────────────────────
@@ -314,10 +314,10 @@ public class BookConverter
         if (mode == TtsMode.Piper) return TtsMode.Piper;
 
         // Auto: онлайн → piper → sapi
-        log?.Invoke("Проверка интернет-подключения...");
+        log?.Invoke(Localizer.L("Log_CheckInternet"));
         if (CheckInternet())
         {
-            log?.Invoke("Интернет доступен → режим: Онлайн (Edge TTS)");
+            log?.Invoke(Localizer.L("Log_InternetOk"));
             return TtsMode.Online;
         }
         else
@@ -326,7 +326,7 @@ public class BookConverter
             if (PiperTtsEngine.IsAvailable())
             {
                 var piperVoices = PiperTtsEngine.GetAvailableVoices();
-                log?.Invoke($"Интернет недоступен → режим: Piper TTS (моделей: {piperVoices.Count})");
+                log?.Invoke(string.Format(Localizer.L("Log_ModePiper"), piperVoices.Count));
                 return TtsMode.Piper;
             }
 
@@ -334,10 +334,10 @@ public class BookConverter
             var offlineVoices = OfflineTtsEngine.GetInstalledVoices();
             if (offlineVoices.Count > 0)
             {
-                log?.Invoke($"Интернет недоступен → режим: Оффлайн (Windows SAPI, голосов: {offlineVoices.Count})");
+                log?.Invoke(string.Format(Localizer.L("Log_ModeSapi"), offlineVoices.Count));
                 return TtsMode.Offline;
             }
-            log?.Invoke("Интернет недоступен, оффлайн-движки не найдены. Попробую онлайн...");
+            log?.Invoke(Localizer.L("Log_NoOfflineEngines"));
             return TtsMode.Online;
         }
     }
@@ -347,9 +347,9 @@ public class BookConverter
     public static string FormatTime(double seconds)
     {
         int s = (int)seconds;
-        if (s < 60) return $"{s} сек";
-        if (s < 3600) return $"{s / 60} мин {s % 60} сек";
-        return $"{s / 3600} ч {s % 3600 / 60} мин";
+        if (s < 60) return string.Format(Localizer.L("Time_Sec"), s);
+        if (s < 3600) return string.Format(Localizer.L("Time_Min"), s / 60, s % 60);
+        return string.Format(Localizer.L("Time_Hour"), s / 3600, s % 3600 / 60);
     }
 
     // ── Основная функция конвертации ─────────────────────────────────
@@ -361,7 +361,7 @@ public class BookConverter
 
         if (!File.Exists(opts.InputFile))
         {
-            log($"Ошибка: файл '{opts.InputFile}' не найден.");
+            log(string.Format(Localizer.L("Log_FileNotFound"), opts.InputFile));
             return null;
         }
 
@@ -370,7 +370,7 @@ public class BookConverter
         var offlineVoices = OfflineTtsEngine.GetInstalledVoices();
         var piperVoices = PiperTtsEngine.GetAvailableVoices();
 
-        log($"Чтение файла: {opts.InputFile}");
+        log(string.Format(Localizer.L("Log_ReadingFile"), opts.InputFile));
 
         // Определение кодировки
         string encoding = opts.Encoding;
@@ -389,7 +389,7 @@ public class BookConverter
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            log("Ошибка: файл пуст.");
+            log(Localizer.L("Log_FileEmpty"));
             return null;
         }
 
@@ -415,24 +415,24 @@ public class BookConverter
         }
         string modeLabel = actualMode switch
         {
-            TtsMode.Online => "Онлайн (Edge TTS)",
-            TtsMode.Piper => "Piper TTS (нейросеть, оффлайн)",
-            TtsMode.Offline => "Оффлайн (Windows SAPI)",
-            _ => "Авто",
+            TtsMode.Online => Localizer.L("Loc_ModeOnline"),
+            TtsMode.Piper => Localizer.L("Loc_ModePiper"),
+            TtsMode.Offline => Localizer.L("Loc_ModeOffline"),
+            _ => Localizer.L("Loc_ModeAuto"),
         };
-        log($"Режим: {modeLabel}");
-        log($"Язык: {lang}, голос: {voice}");
+        log(string.Format(Localizer.L("Log_Mode"), modeLabel));
+        log(string.Format(Localizer.L("Log_LangVoice"), lang, voice));
 
         var chapters = opts.NoChapters
             ? [("", text.Trim())]
             : SplitIntoChapters(text);
-        log($"Найдено глав/частей: {chapters.Count}");
+        log(string.Format(Localizer.L("Log_ChaptersFound"), chapters.Count));
 
         string outDir = opts.OutputDir;
         Directory.CreateDirectory(outDir);
 
         // ── Умная проверка готовых фрагментов ───────────────────────
-        log("\nПроверка готовых фрагментов...");
+        log(Localizer.L("Log_CheckingReady"));
 
         var chapterPaths = new List<string>();
         for (int i = 0; i < chapters.Count; i++)
@@ -474,21 +474,21 @@ public class BookConverter
 
         int skipped = chapters.Count - filesToGenerate.Count;
         if (skipped > 0)
-            log($"Готовых фрагментов: {skipped} из {chapters.Count} — пропускаю");
+            log(string.Format(Localizer.L("Log_ReadySkip"), skipped, chapters.Count));
 
         bool stopped = false;
 
         if (filesToGenerate.Count == 0)
         {
-            log("\nВсе фрагменты уже сгенерированы!");
+            log(Localizer.L("Log_AllReady"));
             opts.Progress?.Invoke(chapters.Count, chapters.Count);
             opts.TimeEstimate?.Invoke("");
         }
         else
         {
             int remaining = filesToGenerate.Count;
-            log($"Осталось сгенерировать: {remaining}\n");
-            log("Генерация аудио...\n");
+            log(string.Format(Localizer.L("Log_Remaining"), remaining));
+            log(Localizer.L("Log_Generating"));
 
             var chunkTimes = new List<double>();
 
@@ -499,7 +499,7 @@ public class BookConverter
                 // Проверка остановки
                 if (opts.CancelToken.IsCancellationRequested)
                 {
-                    log("\nОстановлено пользователем. Прогресс сохранён.");
+                    log(Localizer.L("Log_StoppedSaved"));
                     opts.TimeEstimate?.Invoke("");
                     stopped = true;
                     break;
@@ -508,9 +508,9 @@ public class BookConverter
                 // Проверка паузы
                 if (opts.PauseToken != null && opts.PauseToken.IsPaused)
                 {
-                    log("\nПауза. Можно сменить голос в настройках.");
-                    log("Нажмите «Продолжить» для возобновления.\n");
-                    opts.TimeEstimate?.Invoke("Пауза");
+                    log(Localizer.L("Log_Paused1"));
+                    log(Localizer.L("Log_Paused2"));
+                    opts.TimeEstimate?.Invoke(Localizer.L("Eta_Paused"));
 
                     while (opts.PauseToken.IsPaused)
                     {
@@ -520,7 +520,7 @@ public class BookConverter
 
                     if (opts.CancelToken.IsCancellationRequested)
                     {
-                        log("\nОстановлено пользователем. Прогресс сохранён.");
+                        log(Localizer.L("Log_StoppedSaved"));
                         opts.TimeEstimate?.Invoke("");
                         stopped = true;
                         break;
@@ -532,17 +532,17 @@ public class BookConverter
                         string newVoice = opts.VoiceFunc();
                         if (!string.IsNullOrEmpty(newVoice) && newVoice != voice)
                         {
-                            log($"Голос изменён: {voice} → {newVoice}");
+                            log(string.Format(Localizer.L("Log_VoiceChanged"), voice, newVoice));
                             voice = newVoice;
                         }
                     }
-                    log("Продолжение...\n");
+                    log(Localizer.L("Log_Continuing"));
                 }
 
                 var chunkSw = System.Diagnostics.Stopwatch.StartNew();
 
                 // Синтезируем главу
-                string label = !string.IsNullOrEmpty(title) ? title : $"Часть {chNum}";
+                string label = !string.IsNullOrEmpty(title) ? title : string.Format(Localizer.L("Log_PartLabel"), chNum);
                 log($"[{chNum}/{chapters.Count}] {label}");
 
                 var chunks = SplitTextIntoChunks(body);
@@ -564,7 +564,7 @@ public class BookConverter
                     {
                         string tempPath = filePath.Replace(".mp3", $"_part{ci:D4}.mp3");
                         tempFiles.Add(tempPath);
-                        log($"  фрагмент {ci + 1}/{chunks.Count}...");
+                        log(string.Format(Localizer.L("Log_FragmentN"), ci + 1, chunks.Count));
                         await SynthesizeChunkWithMode(chunks[ci], voice, opts.Speed,
                             speedPct, tempPath, actualMode, offlineVoices, piperVoices, log, opts.CancelToken);
                     }
@@ -599,15 +599,16 @@ public class BookConverter
                 if (left > 0)
                 {
                     double eta = avgTime * left;
-                    opts.TimeEstimate?.Invoke($"Осталось ~{FormatTime(eta)}");
+                    opts.TimeEstimate?.Invoke(string.Format(Localizer.L("Eta_Remaining"), FormatTime(eta)));
                 }
                 else
                 {
                     opts.TimeEstimate?.Invoke("");
                 }
 
-                log($"  ({FormatTime(chunkElapsed)} на фрагмент," +
-                    $" осталось ~{(left > 0 ? FormatTime(avgTime * left) : "0 сек")})\n");
+                log(string.Format(Localizer.L("Log_PerFragment"),
+                    FormatTime(chunkElapsed),
+                    left > 0 ? FormatTime(avgTime * left) : FormatTime(0)));
 
                 // Сохраняем прогресс
                 HistoryManager.AddToHistory(opts.InputFile, outDir, voice, chapters.Count, done);
@@ -616,7 +617,7 @@ public class BookConverter
             if (!stopped)
             {
                 sw.Stop();
-                log($"\nГенерация заняла: {FormatTime(sw.Elapsed.TotalSeconds)}");
+                log(string.Format(Localizer.L("Log_GenTook"), FormatTime(sw.Elapsed.TotalSeconds)));
             }
         }
 
@@ -625,8 +626,8 @@ public class BookConverter
         // Финальная запись в историю
         HistoryManager.AddToHistory(opts.InputFile, outDir, voice, chapters.Count, chapters.Count);
 
-        log($"\nГотово! Файлы сохранены в: {Path.GetFullPath(outDir)}");
-        log("Папка с фрагментами сохранена для дальнейшего использования.");
+        log(string.Format(Localizer.L("Log_DoneSaved"), Path.GetFullPath(outDir)));
+        log(Localizer.L("Log_FolderKept"));
 
         string? mergedPath = null;
         if (opts.Merge && generatedFiles.Count > 1)
@@ -639,7 +640,7 @@ public class BookConverter
             // Удаление фрагментов после объединения (если пользователь выбрал)
             if (opts.DeleteFragments)
             {
-                log("Удаление фрагментов...");
+                log(Localizer.L("Log_DeletingFrags"));
                 int deleted = 0;
                 foreach (string fragFile in generatedFiles)
                 {
@@ -648,13 +649,13 @@ public class BookConverter
                         try { File.Delete(fragFile); deleted++; } catch { }
                     }
                 }
-                log($"Удалено фрагментов: {deleted}");
+                log(string.Format(Localizer.L("Log_DeletedFrags"), deleted));
             }
         }
 
         long totalSize = generatedFiles.Where(File.Exists).Sum(f => new FileInfo(f).Length);
-        log($"\nВсего файлов: {generatedFiles.Count}");
-        log($"Общий размер: {totalSize / (1024.0 * 1024.0):F1} МБ");
+        log(string.Format(Localizer.L("Log_TotalFiles"), generatedFiles.Count));
+        log(string.Format(Localizer.L("Log_TotalSizeMb"), (totalSize / (1024.0 * 1024.0)).ToString("F1")));
 
         return new ConversionResult
         {
